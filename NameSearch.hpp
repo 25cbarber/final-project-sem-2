@@ -5,12 +5,12 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <dirent.h> // For directory operations
+#include <dirent.h>
 using namespace std;
 
 class NameSearch {
 public:
-    static void searchByName(const string& folderPath, const string& name) {
+    static void searchByName(string folderPath, string name) {
         int totalOccurrences = 0;
         int totalOccurrences2010To2022 = 0;
         int maxOccurrences = 0;
@@ -18,8 +18,8 @@ public:
 
         vector<string> files = listFiles(folderPath);
 
-        for (const string& fileName : files) {
-            if (fileName.substr(0, 3) == "yob" && fileName.substr(fileName.size() - 4) == ".txt") {
+        for (string fileName : files) {
+            if (fileName.substr(0, 3) == "yob" &&  fileName.substr(fileName.size() - 4) == ".txt") {
                 string year = fileName.substr(3, 4);
                 ifstream file(folderPath + "/" + fileName);
                 string line;
@@ -53,7 +53,7 @@ public:
     }
 
 private:
-    static vector<string> listFiles(const string& folderPath) {
+    static vector<string> listFiles(string& folderPath) {
         vector<string> files;
         DIR* dir = opendir(folderPath.c_str());
         if (dir) {
@@ -72,4 +72,4 @@ private:
     }
 };
 
-#endif // NAMESEARCH_HPP
+#endif
