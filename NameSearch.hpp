@@ -10,6 +10,8 @@ using namespace std;
 class NameSearch {
 public:
     static void searchByName(string folderPath, string name);
+    static void searchByName(string folderPath, string name, string mode, string param);
+    static void searchByName(string folderPath, string name, string mode, int year); // Overload for year
 
 private:
     static vector<string> listFiles(string folderPath);
