@@ -36,7 +36,7 @@ int main() {
               
                 break;
             case 4:
-                cout << "Exiting program. Goodbye!" << endl;
+                cout << "Goodbye!" << endl;
                 break;
             default:
                 cout << "Invalid choice. Please try again." << endl;
