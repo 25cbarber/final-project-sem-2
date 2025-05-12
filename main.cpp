@@ -43,7 +43,7 @@ int main() {
                     string yearStr = mode.substr(yearPos + 1);
                     try {
                         int year = stoi(yearStr);
-                        NameSearch::searchByName(folderPath, name, "-e", year); 
+                        NameSearch::searchByNameAndYear(folderPath, name, year); // Call the new function
                     } catch (invalid_argument&) {
                         cout << "Invalid year. Please provide a valid year." << endl;
                     }
@@ -74,27 +74,14 @@ int main() {
                 if (year < 1880 || year > 2022) {
                     cout << "Invalid date entered. To search by year, please enter a valid year between 1880 and 2022." << endl;
                 } else {
-                    NameSearch::searchByName(folderPath, "", "-e", year);
+                    NameSearch::searchByYear(folderPath, year); // Call the new function
                 }
                 break;
             }
-            case 3: { // Updated case 3 for searching by state acronym
-                cout << "Enter a state acronym (e.g., UT, WA, FL): ";
-                string state;
-                cin >> state;
-
-                if (state.length() != 2) {
-                    cout << "Invalid input. Please enter a 2-character state acronym (e.g., UT, FL, WA)." << endl;
-                } else {
-                    // Convert state acronym to uppercase
-                    state[0] = toupper(state[0]);
-                    state[1] = toupper(state[1]);
-
-                    // Call the searchByName function with the state acronym
-                    NameSearch::searchByName("./namesbystate", "", "-s", state);
-                }
+            case 3:
+                cout << "You selected: Search by State" << endl;
+                cout << "This functionality is not implemented yet." << endl;
                 break;
-            }
             case 4:
                 cout << "Goodbye!" << endl;
                 break;
