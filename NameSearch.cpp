@@ -9,52 +9,50 @@ void NameSearch::searchByName(string folderPath, string name, string mode, strin
     transform(name.begin(), name.end(), name.begin(), ::tolower);
 
     if (mode == "-e") {
-        int startYear = stoi(param);
-        int endYear = 2022;
-        if (startYear < 1880 || startYear > endYear) {
-            cout << "Invalid year. Please provide a year between 1880 and " << endYear << "." << endl;
+        int searchYear = stoi(param);
+        if (searchYear < 1880 || searchYear > 2022) {
+            cout << "Invalid year. Please provide a year between 1880 and 2022." << endl;
             return;
         }
 
         int totalOccurrences = 0;
-        vector<string> files = listFiles(folderPath);
+        string fileName = "yob" + to_string(searchYear) + ".txt";
+        ifstream file(folderPath + "/" + fileName);
+        if (!file.is_open()) {
+            cerr << "Error: Unable to open file " << fileName << endl;
+            return;
+        }
 
-        for (string fileName : files) {
-            if (fileName.substr(0, 3) == "yob" && fileName.substr(fileName.size() - 4) == ".txt") {
-                string year = fileName.substr(3, 4);
-                int yearInt = stoi(year);
-                if (yearInt >= startYear) {
-                    ifstream file(folderPath + "/" + fileName);
-                    string line;
+        string line;
+        while (getline(file, line)) {
+            size_t comma1 = line.find(',');
+            size_t comma2 = line.rfind(',');
 
-                    while (getline(file, line)) {
-                        size_t comma1 = line.find(',');
-                        size_t comma2 = line.rfind(',');
+            if (comma1 == string::npos || comma2 == string::npos || comma1 == comma2) {
+                cerr << "Error: Malformed line in file: " << line << endl;
+                continue; // Skip malformed lines
+            }
 
-                        if (comma1 == string::npos || comma2 == string::npos || comma1 == comma2) {
-                            cerr << "Error: Malformed line in file: " << line << endl;
-                            continue; // Skip malformed lines
-                        }
+            string currentName = line.substr(0, comma1);
+            transform(currentName.begin(), currentName.end(), currentName.begin(), ::tolower);
 
-                        string currentName = line.substr(0, comma1);
-                        transform(currentName.begin(), currentName.end(), currentName.begin(), ::tolower);
+            int occurrences = stoi(line.substr(comma2 + 1));
 
-                        int occurrences = stoi(line.substr(comma2 + 1));
-
-                        if (currentName == name) {
-                            totalOccurrences += occurrences;
-                        }
-                    }
-                }
+            if (currentName == name) {
+                totalOccurrences += occurrences;
             }
         }
 
-        cout << "\nTotal occurrences for " << name << " from " << startYear << " to " << endYear << ": " << totalOccurrences << "\n" << endl;
+        if (totalOccurrences > 0) {
+            cout << "\nTotal occurrences for " << name << " in " << searchYear << ": " << totalOccurrences << "\n" << endl;
+        } else {
+            cout << "\nNo occurrences found for " << name << " in " << searchYear << ".\n" << endl;
+        }
     } else if (mode == "-s") {
         string state = param;
         int totalOccurrences = 0;
 
-        folderPath = "./namesbystate";
+        folderPath = "./names";
 
         vector<string> files = listFiles(folderPath);
 
@@ -218,54 +216,52 @@ void NameSearch::searchByYear(string folderPath, int year) {
         return;
     }
 
-    // Construct the filename for the given year
     string fileName = "yob" + to_string(year) + ".txt";
     string filePath = folderPath + "/" + fileName;
 
     ifstream file(filePath);
     if (!file.is_open()) {
-        cerr << "Error: Unable to open file " << fileName << endl;
+        cerr << "Error: Unable to open file " << filePath << endl;
         return;
     }
+
+    cout << "Opened file: " << filePath << endl;
 
     map<string, int> nameOccurrences;
     string line;
 
-    cout << "Processing file: " << fileName << endl;
-
-    // Read the file line by line
     while (getline(file, line)) {
         size_t comma1 = line.find(',');
         size_t comma2 = line.rfind(',');
 
         if (comma1 == string::npos || comma2 == string::npos || comma1 == comma2) {
             cerr << "Error: Malformed line in file: " << line << endl;
-            continue; // Skip malformed lines
+            continue;
         }
 
-        string currentName = line.substr(0, comma1); // Extract the name
-        int occurrences = stoi(line.substr(comma2 + 1)); // Extract the occurrences
+        string name = line.substr(0, comma1);
+        string gender = line.substr(comma1 + 1, comma2 - comma1 - 1);
+        int occurrences = stoi(line.substr(comma2 + 1));
 
-        nameOccurrences[currentName] += occurrences; // Aggregate occurrences
+        // Combine names regardless of gender
+        nameOccurrences[name] += occurrences;
     }
 
     file.close();
 
-    cout << "Finished processing file. Sorting results..." << endl;
-
     // Sort the names by occurrences in descending order
     vector<pair<string, int>> sortedNames(nameOccurrences.begin(), nameOccurrences.end());
     sort(sortedNames.begin(), sortedNames.end(), [](const pair<string, int>& a, const pair<string, int>& b) {
-        return b.second > a.second; // Sort in descending order
+        return a.second > b.second;
     });
 
-    // Display the top 5 most popular names
     cout << "\nThe most popular names in " << year << " were:\n";
     for (size_t i = 0; i < min(sortedNames.size(), size_t(5)); ++i) {
         cout << i + 1 << ". " << sortedNames[i].first << " | " << sortedNames[i].second << endl;
     }
     cout << endl;
 }
+
 
 void NameSearch::searchByNameAndYear(string folderPath, string name, int year) {
     transform(name.begin(), name.end(), name.begin(), ::tolower);
